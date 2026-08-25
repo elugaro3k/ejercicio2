@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rutina General - Hombres 40+</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; padding: 20px; display: flex; justify-content: center; align-items: center;
+        }
+        .container {
+            background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px; width: 100%; padding: 40px;
+        }
+        h1 { color: #667eea; text-align: center; margin-bottom: 10px; font-size: 28px; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; font-size: 14px; }
+        .exercise-card {
+            background: #f8f9fa; border-left: 5px solid #667eea; padding: 20px;
+            margin-bottom: 20px; border-radius: 10px; display: none;
+        }
+        .exercise-card.active { display: block; }
+        .exercise-number { color: #667eea; font-size: 14px; font-weight: bold; margin-bottom: 5px; }
+        .exercise-name { font-size: 24px; color: #333; margin-bottom: 10px; font-weight: bold; }
+        .exercise-objective { color: #666; font-size: 14px; margin-bottom: 15px; line-height: 1.5; }
+        .exercise-instructions {
+            background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;
+            font-size: 14px; line-height: 1.6; color: #555;
+        }
+        .timer-section { text-align: center; padding: 20px; background: white; border-radius: 10px; margin-top: 15px; }
+        .timer-display {
+            font-size: 48px; font-weight: bold; color: #667eea; margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .timer-controls { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .btn {
+            padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px;
+            font-weight: bold; cursor: pointer; transition: all 0.3s; text-transform: uppercase;
+        }
+        .btn-start { background: #28a745; color: white; }
+        .btn-start:hover { background: #218838; }
+        .btn-pause { background: #ffc107; color: #333; }
+        .btn-pause:hover { background: #e0a800; }
+        .btn-reset { background: #dc3545; color: white; }
+        .btn-reset:hover { background: #c82333; }
+        .btn-next { background: #667eea; color: white; width: 100%; margin-top: 20px; padding: 15px; font-size: 18px; }
+        .btn-next:hover { background: #5568d3; }
+        .reps-display { text-align: center; padding: 20px; background: white; border-radius: 10px; margin-top: 15px; }
+        .reps-number { font-size: 32px; font-weight: bold; color: #28a745; margin: 15px 0; }
+        .sets-tracker { background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0; text-align: center; }
+        .sets-counter { font-size: 24px; font-weight: bold; color: #667eea; margin: 10px 0; }
+        .sets-dots { display: flex; justify-content: center; gap: 10px; margin: 15px 0; }
+        .set-dot {
+            width: 30px; height: 30px; border-radius: 50%; background: #e9ecef;
+            display: flex; align-items: center; justify-content: center; font-weight: bold;
+            color: #999; transition: all 0.3s;
+        }
+        .set-dot.completed { background: #28a745; color: white; }
+        .set-dot.current { background: #ffc107; color: #333; transform: scale(1.2); }
+        .rest-timer {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            padding: 20px; border-radius: 10px; margin: 15px 0; text-align: center; display: none;
+        }
+        .rest-timer.active { display: block; }
+        .rest-timer-label { color: white; font-size: 14px; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }
+        .rest-timer-display {
+            font-size: 56px; font-weight: bold; color: white; font-family: 'Courier New', monospace; margin: 10px 0;
+        }
+        .btn-complete-set { background: #17a2b8; color: white; width: 100%; margin-top: 10px; }
+        .btn-complete-set:hover { background: #138496; }
+        .btn-skip-rest { background: #6c757d; color: white; margin-top: 10px; }
+        .btn-skip-rest:hover { background: #5a6268; }
+        .btn-next-set { background: #28a745; color: white; width: 100%; margin-top: 10px; display: none; }
+        .btn-next-set.active { display: block; }
+        .btn-next-set:hover { background: #218838; }
+        .progress-bar { width: 100%; height: 8px; background: #e9ecef; border-radius: 10px; margin: 20px 0; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); transition: width 0.3s; }
+        .exercise-counter { text-align: center; color: #666; font-size: 14px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏋️ Rutina Funcional</h1>
+        <p class="subtitle">Hombres de 40 años o más</p>
+        
+        <div class="exercise-counter">
+            Ejercicio <span id="currentExercise">1</span> de <span id="totalExercises">6</span>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <!-- Ejercicio 1 -->
+        <div class="exercise-card active" data-exercise="1">
+            <div class="exercise-number">EJERCICIO 1</div>
+            <div class="exercise-name">Correr en el lugar</div>
+            <div class="exercise-objective">Calentamiento y Cardio</div>
+            <div class="exercise-instructions">
+                Con las piernas separadas al ancho de caderas y rodillas ligeramente flexionadas, eleva alternadamente las rodillas mientras balanceas los brazos de forma rítmica. Mantén el torso erguido.
+            </div>
+            <div class="timer-section">
+                <div class="timer-display" id="timer1">02:00</div>
+                <div class="timer-controls">
+                    <!-- CAMBIO: Se añade initAudio() al onclick -->
+                    <button class="btn btn-start" onclick="initAudio(); startTimer(1, 120)">Iniciar</button>
+                    <button class="btn btn-pause" onclick="pauseTimer(1)">Pausar</button>
+                    <button class="btn btn-reset" onclick="resetTimer(1, 120)">Reiniciar</button>
+                </div>
+            </div>
+            <button class="btn btn-next" onclick="nextExercise()">Siguiente Ejercicio →</button>
+        </div>
+
+        <!-- Ejercicio 2 -->
+        <div class="exercise-card" data-exercise="2">
+            <div class="exercise-number">EJERCICIO 2</div>
+            <div class="exercise-name">Flexiones de Pecho</div>
+            <div class="exercise-objective">Pecho, tríceps, deltoides anteriores y activación del core</div>
+            <div class="reps-display">
+                <div style="font-size: 14px; color: #666;">Objetivo por serie</div>
+                <div class="reps-number">8-15 reps</div>
+                <div style="font-size: 14px; color: #666;">Ajustar en suelo o sobre elevación según nivel</div>
+            </div>
+            <div class="sets-tracker">
+                <div style="font-size: 14px; color: #666;">Series completadas</div>
+                <div class="sets-dots" id="setsDots2">
+                    <div class="set-dot current">1</div><div class="set-dot">2</div><div class="set-dot">3</div>
+                </div>
+                <div class="sets-counter"><span id="completedSets2">0</span> / 3 series</div>
+                <button class="btn btn-complete-set" id="completeSetBtn2" onclick="completeSet(2, 3)">✓ Completar Serie</button>
+                <div class="rest-timer" id="restTimer2">
+                    <div class="rest-timer-label">⏱️ Descanso</div>
+                    <div class="rest-timer-display" id="restDisplay2">00:30</div>
+                    <button class="btn btn-skip-rest" onclick="skipRest(2, 3)">Saltar Descanso →</button>
+                </div>
+                <button class="btn btn-next-set" id="nextSetBtn2" onclick="nextSet(2, 3)">Iniciar Siguiente Serie →</button>
+            </div>
+            <button class="btn btn-next" onclick="nextExercise()">Siguiente Ejercicio →</button>
+        </div>
+
+        <!-- Ejercicio 3 -->
+        <div class="exercise-card" data-exercise="3">
+            <div class="exercise-number">EJERCICIO 3</div>
+            <div class="exercise-name">Sentadillas</div>
+            <div class="exercise-objective">Cuádriceps, glúteos e isquiotibiales</div>
+            <div class="reps-display">
+                <div style="font-size: 14px; color: #666;">Objetivo por serie</div>
+                <div class="reps-number">10-15 reps</div>
+            </div>
+            <div class="sets-tracker">
+                <div style="font-size: 14px; color: #666;">Series completadas</div>
+                <div class="sets-dots" id="setsDots3">
+                    <div class="set-dot current">1</div><div class="set-dot">2</div><div class="set-dot">3</div>
+                </div>
+                <div class="sets-counter"><span id="completedSets3">0</span> / 3 series</div>
+                <button class="btn btn-complete-set" id="completeSetBtn3" onclick="completeSet(3, 3)">✓ Completar Serie</button>
+                <div class="rest-timer" id="restTimer3">
+                    <div class="rest-timer-label">⏱️ Descanso</div>
+                    <div class="rest-timer-display" id="restDisplay3">00:30</div>
+                    <button class="btn btn-skip-rest" onclick="skipRest(3, 3)">Saltar Descanso →</button>
+                </div>
+                <button class="btn btn-next-set" id="nextSetBtn3" onclick="nextSet(3, 3)">Iniciar Siguiente Serie →</button>
+            </div>
+            <button class="btn btn-next" onclick="nextExercise()">Siguiente Ejercicio →</button>
+        </div>
+
+        <!-- Ejercicio 4 -->
+        <div class="exercise-card" data-exercise="4">
+            <div class="exercise-number">EJERCICIO 4</div>
+            <div class="exercise-name">Zancadas</div>
+            <div class="exercise-objective">Trabajo unilateral para piernas, glúteos, estabilidad y simetría</div>
+            <div class="reps-display">
+                <div style="font-size: 14px; color: #666;">Objetivo por serie</div>
+                <div class="reps-number">8-12 reps por pierna</div>
+            </div>
+            <div class="sets-tracker">
+                <div style="font-size: 14px; color: #666;">Series completadas</div>
+                <div class="sets-dots" id="setsDots4">
+                    <div class="set-dot current">1</div><div class="set-dot">2</div><div class="set-dot">3</div>
+                </div>
+                <div class="sets-counter"><span id="completedSets4">0</span> / 3 series</div>
+                <button class="btn btn-complete-set" id="completeSetBtn4" onclick="completeSet(4, 3)">✓ Completar Serie</button>
+                <div class="rest-timer" id="restTimer4">
+                    <div class="rest-timer-label">⏱️ Descanso</div>
+                    <div class="rest-timer-display" id="restDisplay4">00:30</div>
+                    <button class="btn btn-skip-rest" onclick="skipRest(4, 3)">Saltar Descanso →</button>
+                </div>
+                <button class="btn btn-next-set" id="nextSetBtn4" onclick="nextSet(4, 3)">Iniciar Siguiente Serie →</button>
+            </div>
+            <button class="btn btn-next" onclick="nextExercise()">Siguiente Ejercicio →</button>
+        </div>
+
+        <!-- Ejercicio 5 -->
+        <div class="exercise-card" data-exercise="5">
+            <div class="exercise-number">EJERCICIO 5</div>
+            <div class="exercise-name">Plancha Prona</div>
+            <div class="exercise-objective">Core, abdominales, glúteos y alineación postural</div>
+            <div class="sets-tracker">
+                <div style="font-size: 14px; color: #666;">Series completadas</div>
+                <div class="sets-dots" id="setsDots5">
+                    <div class="set-dot current">1</div><div class="set-dot">2</div><div class="set-dot">3</div>
+                </div>
+                <div class="sets-counter"><span id="completedSets5">0</span> / 3 series</div>
+                <div class="timer-section">
+                    <div class="timer-display" id="timer5">00:30</div>
+                    <div class="timer-controls">
+                        <!-- CAMBIO: Se añade initAudio() al onclick -->
+                        <button class="btn btn-start" onclick="initAudio(); startTimer(5, 30)">Iniciar</button>
+                        <button class="btn btn-pause" onclick="pauseTimer(5)">Pausar</button>
+                        <button class="btn btn-reset" onclick="resetTimer(5, 30)">Reiniciar</button>
+                    </div>
+                </div>
+                <button class="btn btn-complete-set" id="completeSetBtn5" onclick="completeSet(5, 3)">✓ Completar Serie</button>
+                <div class="rest-timer" id="restTimer5">
+                    <div class="rest-timer-label">⏱️ Descanso</div>
+                    <div class="rest-timer-display" id="restDisplay5">00:30</div>
+                    <button class="btn btn-skip-rest" onclick="skipRest(5, 3)">Saltar Descanso →</button>
+                </div>
+                <button class="btn btn-next-set" id="nextSetBtn5" onclick="nextSet(5, 3)">Iniciar Siguiente Serie →</button>
+            </div>
+            <button class="btn btn-next" onclick="nextExercise()">Siguiente Ejercicio →</button>
+        </div>
+
+        <!-- Ejercicio 6 -->
+        <div class="exercise-card" data-exercise="6">
+            <div class="exercise-number">EJERCICIO 6</div>
+            <div class="exercise-name">Inclinación sobre Mesa</div>
+            <div class="exercise-objective">Descomprimir la columna vertebral, estirar la espalda baja, dorsales y hombros</div>
+            <div class="exercise-instructions">
+                Apoya las palmas o antebrazos sobre una mesa alta o mostrador. Da unos pasos hacia atrás, flexiona ligeramente las rodillas e inclina el torso hacia adelante hasta formar un ángulo de 90°. Deja que la cadera tire suavemente hacia atrás alargando la columna.
+            </div>
+            <div class="sets-tracker">
+                <div style="font-size: 14px; color: #666;">Series completadas</div>
+                <div class="sets-dots" id="setsDots6">
+                    <div class="set-dot current">1</div><div class="set-dot">2</div><div class="set-dot">3</div>
+                </div>
+                <div class="sets-counter"><span id="completedSets6">0</span> / 3 series</div>
+                <div class="timer-section">
+                    <div class="timer-display" id="timer6">00:30</div>
+                    <div class="timer-controls">
+                        <!-- CAMBIO: Se añade initAudio() al onclick -->
+                        <button class="btn btn-start" onclick="initAudio(); startTimer(6, 30)">Iniciar</button>
+                        <button class="btn btn-pause" onclick="pauseTimer(6)">Pausar</button>
+                        <button class="btn btn-reset" onclick="resetTimer(6, 30)">Reiniciar</button>
+                    </div>
+                </div>
+                <button class="btn btn-complete-set" id="completeSetBtn6" onclick="completeSet(6, 3)">✓ Completar Serie</button>
+                <div class="rest-timer" id="restTimer6">
+                    <div class="rest-timer-label">⏱️ Descanso</div>
+                    <div class="rest-timer-display" id="restDisplay6">00:30</div>
+                    <button class="btn btn-skip-rest" onclick="skipRest(6, 3)">Saltar Descanso →</button>
+                </div>
+                <button class="btn btn-next-set" id="nextSetBtn6" onclick="nextSet(6, 3)">Iniciar Siguiente Serie →</button>
+            </div>
+            <button class="btn btn-next" onclick="nextExercise()">Finalizar Rutina ✓</button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // CAMBIO 1: Funciones de Audio (Web Audio API)
+        // ==========================================
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playTimerAlert() {
+            if (!audioCtx) return;
+            try {
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                // Configuración tipo "PING" (agudo y decaimiento rápido)
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(1500, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                
+                oscillator.start(audioCtx.currentTime);
+                oscillator.stop(audioCtx.currentTime + 0.2);
+            } catch (e) { 
+                console.warn("Error de audio (posiblemente bloqueado por el navegador):", e); 
+            }
+        }
+
+        // ==========================================
+        // Lógica original de la rutina
+        // ==========================================
+        let currentExerciseNum = 1;
+        const totalExercises = 6;
+        const timers = {};
+        const timerIntervals = {};
+        const restTimers = {};
+        const restIntervals = {};
+        const completedSets = {2: 0, 3: 0, 4: 0, 5: 0, 6: 0};
+        const REST_DURATION = 30;
+        const EXERCISE_DURATIONS = {1: 120, 5: 30, 6: 30};
+
+        function updateProgress() {
+            const progress = (currentExerciseNum / totalExercises) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('currentExercise').textContent = currentExerciseNum;
+        }
+
+        function resetExerciseState(exerciseId) {
+            if (timerIntervals[exerciseId]) {
+                clearInterval(timerIntervals[exerciseId]);
+                timerIntervals[exerciseId] = null;
+            }
+            if (restIntervals[exerciseId]) {
+                clearInterval(restIntervals[exerciseId]);
+                restIntervals[exerciseId] = null;
+            }
+
+            completedSets[exerciseId] = 0;
+
+            const timerDisplay = document.getElementById(`timer${exerciseId}`);
+            if (timerDisplay && EXERCISE_DURATIONS[exerciseId]) {
+                timers[exerciseId] = EXERCISE_DURATIONS[exerciseId];
+                timerDisplay.textContent = formatTime(EXERCISE_DURATIONS[exerciseId]);
+                timerDisplay.style.color = '#667eea';
+            }
+
+            const restDisplay = document.getElementById(`restDisplay${exerciseId}`);
+            if (restDisplay) {
+                restDisplay.textContent = formatTime(REST_DURATION);
+            }
+
+            const completeBtn = document.getElementById(`completeSetBtn${exerciseId}`);
+            if (completeBtn) completeBtn.style.display = 'block';
+
+            const restTimerEl = document.getElementById(`restTimer${exerciseId}`);
+            if (restTimerEl) restTimerEl.classList.remove('active');
+
+            const nextSetBtn = document.getElementById(`nextSetBtn${exerciseId}`);
+            if (nextSetBtn) nextSetBtn.classList.remove('active');
+
+            updateSetsDisplay(exerciseId);
+        }
+
+        function nextExercise() {
+            if (currentExerciseNum >= 2 && currentExerciseNum <= 6) {
+                resetExerciseState(currentExerciseNum);
+            } else if (currentExerciseNum === 1) {
+                if (timerIntervals[1]) {
+                    clearInterval(timerIntervals[1]);
+                    timerIntervals[1] = null;
+                }
+                timers[1] = 120;
+                const display = document.getElementById('timer1');
+                display.textContent = formatTime(120);
+                display.style.color = '#667eea';
+            }
+
+            if (currentExerciseNum >= totalExercises) {
+                alert('¡Rutina completada! 🎉');
+                currentExerciseNum = 1;
+                for (let ex = 2; ex <= 6; ex++) {
+                    resetExerciseState(ex);
+                }
+            } else {
+                currentExerciseNum++;
+            }
+            
+            document.querySelectorAll('.exercise-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            document.querySelector(`[data-exercise="${currentExerciseNum}"]`).classList.add('active');
+            updateProgress();
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function startTimer(exerciseId, duration) {
+            if (timerIntervals[exerciseId]) {
+                clearInterval(timerIntervals[exerciseId]);
+            }
+
+            if (!timers[exerciseId]) {
+                timers[exerciseId] = duration;
+            }
+
+            const display = document.getElementById(`timer${exerciseId}`);
+            
+            timerIntervals[exerciseId] = setInterval(() => {
+                timers[exerciseId]--;
+                display.textContent = formatTime(timers[exerciseId]);
+
+                if (timers[exerciseId] <= 0) {
+                    clearInterval(timerIntervals[exerciseId]);
+                    display.textContent = '¡TIEMPO!';
+                    display.style.color = '#28a745';
+                    
+                    // CAMBIO 2: Alerta sonora al finalizar ejercicio
+                    playTimerAlert(); 
+                    
+                    if (navigator.vibrate) {
+                        navigator.vibrate([200, 100, 200]);
+                    }
+                }
+            }, 1000);
+        }
+
+        function pauseTimer(exerciseId) {
+            if (timerIntervals[exerciseId]) {
+                clearInterval(timerIntervals[exerciseId]);
+                timerIntervals[exerciseId] = null;
+            }
+        }
+
+        function resetTimer(exerciseId, duration) {
+            if (timerIntervals[exerciseId]) {
+                clearInterval(timerIntervals[exerciseId]);
+                timerIntervals[exerciseId] = null;
+            }
+            timers[exerciseId] = duration;
+            const display = document.getElementById(`timer${exerciseId}`);
+            display.textContent = formatTime(duration);
+            display.style.color = '#667eea';
+        }
+
+        function updateSetsDisplay(exerciseId) {
+            const dotsContainer = document.getElementById(`setsDots${exerciseId}`);
+            if (!dotsContainer) return;
+            
+            const dots = dotsContainer.querySelectorAll('.set-dot');
+            const completed = completedSets[exerciseId];
+            
+            dots.forEach((dot, index) => {
+                dot.classList.remove('completed', 'current');
+                if (index < completed) {
+                    dot.classList.add('completed');
+                    dot.textContent = '✓';
+                } else if (index === completed) {
+                    dot.classList.add('current');
+                    dot.textContent = index + 1;
+                } else {
+                    dot.textContent = index + 1;
+                }
+            });
+            
+            const counter = document.getElementById(`completedSets${exerciseId}`);
+            if (counter) {
+                counter.textContent = completed;
+            }
+        }
+
+        function completeSet(exerciseId, totalSets) {
+            completedSets[exerciseId]++;
+            updateSetsDisplay(exerciseId);
+            
+            if (completedSets[exerciseId] >= totalSets) {
+                const completeBtn = document.getElementById(`completeSetBtn${exerciseId}`);
+                if (completeBtn) completeBtn.style.display = 'none';
+                
+                const restTimerEl = document.getElementById(`restTimer${exerciseId}`);
+                if (restTimerEl) restTimerEl.classList.remove('active');
+                
+                const nextSetBtn = document.getElementById(`nextSetBtn${exerciseId}`);
+                if (nextSetBtn) nextSetBtn.classList.remove('active');
+                
+                alert(`¡Todas las series completadas! 🎉`);
+            } else {
+                startRestTimer(exerciseId);
+            }
+        }
+
+        function startRestTimer(exerciseId) {
+            const restTimerEl = document.getElementById(`restTimer${exerciseId}`);
+            const restDisplay = document.getElementById(`restDisplay${exerciseId}`);
+            const nextSetBtn = document.getElementById(`nextSetBtn${exerciseId}`);
+            const completeBtn = document.getElementById(`completeSetBtn${exerciseId}`);
+            
+            if (!restTimerEl || !restDisplay || !nextSetBtn || !completeBtn) return;
+            
+            completeBtn.style.display = 'none';
+            restTimerEl.classList.add('active');
+            nextSetBtn.classList.remove('active');
+            
+            restTimers[exerciseId] = REST_DURATION;
+            restDisplay.textContent = formatTime(restTimers[exerciseId]);
+            
+            if (restIntervals[exerciseId]) {
+                clearInterval(restIntervals[exerciseId]);
+            }
+            
+            restIntervals[exerciseId] = setInterval(() => {
+                restTimers[exerciseId]--;
+                restDisplay.textContent = formatTime(restTimers[exerciseId]);
+                
+                if (restTimers[exerciseId] <= 0) {
+                    clearInterval(restIntervals[exerciseId]);
+                    restDisplay.textContent = '¡LISTO!';
+                    nextSetBtn.classList.add('active');
+                    
+                    // CAMBIO 3: Alerta sonora al finalizar descanso
+                    playTimerAlert(); 
+                    
+                    if (navigator.vibrate) {
+                        navigator.vibrate([200, 100, 200]);
+                    }
+                }
+            }, 1000);
+        }
+
+        function skipRest(exerciseId, totalSets) {
+            if (restIntervals[exerciseId]) {
+                clearInterval(restIntervals[exerciseId]);
+            }
+            const restTimerEl = document.getElementById(`restTimer${exerciseId}`);
+            const nextSetBtn = document.getElementById(`nextSetBtn${exerciseId}`);
+            
+            if (restTimerEl) restTimerEl.classList.remove('active');
+            if (nextSetBtn) nextSetBtn.classList.add('active');
+        }
+
+        function nextSet(exerciseId, totalSets) {
+            const restTimerEl = document.getElementById(`restTimer${exerciseId}`);
+            const nextSetBtn = document.getElementById(`nextSetBtn${exerciseId}`);
+            const completeBtn = document.getElementById(`completeSetBtn${exerciseId}`);
+            
+            if (restTimerEl) restTimerEl.classList.remove('active');
+            if (nextSetBtn) nextSetBtn.classList.remove('active');
+            if (completeBtn) completeBtn.style.display = 'block';
+            
+            const timerDisplay = document.getElementById(`timer${exerciseId}`);
+            if (timerDisplay && (exerciseId === 5 || exerciseId === 6)) {
+                resetTimer(exerciseId, 30);
+            }
+        }
+
+        updateProgress();
+    </script>
+</body>
+</html>
