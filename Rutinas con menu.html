@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro de Rutinas</title>
+    <style>
+        :root {
+            --primary: #e74c3c;
+            --secondary: #2c3e50;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --info: #2980b9;
+            --light-bg: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-light: #7f8c8d;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            max-width: 600px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+            align-self: flex-start;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--secondary), #34495e);
+            color: white;
+            padding: 24px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .header p {
+            margin: 8px 0 0;
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .back-btn:hover { background: rgba(255,255,255,0.3); }
+
+        /* === SELECTOR DE RUTINAS === */
+        .routine-selector {
+            padding: 30px 20px;
+        }
+
+        .routine-selector h2 {
+            text-align: center;
+            margin-bottom: 24px;
+            color: var(--secondary);
+        }
+
+        .routine-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .routine-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .routine-card h3 {
+            margin: 0 0 8px;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .routine-card .meta {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+
+        .routine-card .desc {
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--info);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-right: 6px;
+        }
+
+        .badge.strength { background: var(--warning); }
+        .badge.cardio { background: var(--primary); }
+
+        /* === ÁREA DE EJERCICIOS === */
+        .exercise-card {
+            padding: 24px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .exercise-header { margin-bottom: 16px; }
+
+        .exercise-counter {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .exercise-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 4px 0;
+        }
+
+        .exercise-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .exercise-desc {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .timer-display {
+            font-size: 4rem;
+            font-weight: 800;
+            text-align: center;
+            color: var(--secondary);
+            margin: 10px 0;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .interval-status {
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .status-active { background: #e8f8f5; color: var(--success); }
+        .status-rest { background: #fef9e7; color: var(--warning); }
+        .status-continuous { background: #ebf5fb; color: var(--info); }
+
+        /* === SERIES (Rutina 40+) === */
+        .series-tracker {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .series-dot {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ecf0f1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--text-light);
+            border: 2px solid #bdc3c7;
+        }
+
+        .series-dot.done {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+
+        .series-dot.current {
+            background: var(--warning);
+            color: white;
+            border-color: var(--warning);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .series-info {
+            text-align: center;
+            font-size: 1rem;
+            color: var(--text-light);
+            margin-bottom: 16px;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: white;
+            transition: transform 0.1s, opacity 0.2s;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .btn:active { transform: scale(0.96); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-start { background: var(--success); }
+        .btn-pause { background: var(--warning); }
+        .btn-reset { background: #95a5a6; }
+        .btn-next { background: var(--info); }
+        .btn-complete { background: var(--success); }
+        .btn-skip {
+            background: transparent;
+            color: var(--info);
+            border: 2px solid var(--info);
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: #ecf0f1;
+            border-radius: 3px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 1s linear;
+        }
+
+        .final-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .final-screen h2 {
+            color: var(--success);
+            font-size: 2rem;
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="app-container" id="app">
+    <!-- ============ PANTALLA: SELECTOR DE RUTINAS ============ -->
+    <div id="screen-selector">
+        <div class="header">
+            <h1>💪 Centro de Rutinas</h1>
+            <p>Selecciona tu entrenamiento de hoy</p>
+        </div>
+        <div class="routine-selector">
+            <h2>¿Qué quieres entrenar?</h2>
+
+            <div class="routine-card" onclick="startRoutine('40plus')">
+                <h3>🏋️ Rutina Funcional - Hombres 40+</h3>
+                <div class="meta">
+                    <span class="badge strength">Fuerza</span>
+                    <span class="badge">6 Ejercicios</span>
+                    <span class="badge">3 Series c/u</span>
+                </div>
+                <div class="desc">
+                    Rutina general con calentamiento, trabajo de fuerza (flexiones, sentadillas, zancadas), core (plancha) y estiramiento final en mesa. Progresión por series y repeticiones.
+                </div>
+            </div>
+
+            <div class="routine-card" onclick="startRoutine('kickboxing')">
+                <h3>🥊 Cardio-Kickboxing Bilateral</h3>
+                <div class="meta">
+                    <span class="badge cardio">Cardio</span>
+                    <span class="badge">4 Fases</span>
+                    <span class="badge">30 Minutos</span>
+                </div>
+                <div class="desc">
+                    Rutina fluida de bajo impacto con trabajo bilateral. Intervalos de 45s activo / 15s descanso. Combina boxeo, piernas y vuelta a la calma.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ PANTALLA: RUTINA ACTIVA ============ -->
+    <div id="screen-routine" class="hidden">
+        <div class="header">
+            <button class="back-btn" onclick="backToSelector()">← Cambiar Rutina</button>
+            <h1 id="routine-title">Rutina</h1>
+            <p id="routine-subtitle">Subtítulo</p>
+        </div>
+        <div id="exercise-area"></div>
+    </div>
+</div>
+
+<script>
+/* ============================================================
+   DATOS DE LAS RUTINAS
+   ============================================================ */
+
+const routines = {
+    '40plus': {
+        title: "Rutina General - Hombres 40+",
+        subtitle: "🏋️ Rutina Funcional",
+        type: 'series',
+        exercises: [
+            {
+                title: "Correr en el lugar",
+                subtitle: "Calentamiento y Cardio",
+                desc: "Con las piernas separadas al ancho de caderas y rodillas ligeramente flexionadas, eleva alternadamente las rodillas mientras balanceas los brazos de forma rítmica. Mantén el torso erguido.",
+                mode: 'time',
+                duration: 120,
+                series: 1
+            },
+            {
+                title: "Flexiones de Pecho",
+                subtitle: "Pecho, tríceps, deltoides anteriores y core",
+                desc: "Objetivo: 8-15 reps. Ajustar en suelo o sobre elevación según nivel.",
+                mode: 'reps',
+                reps: "8-15",
+                series: 3
+            },
+            {
+                title: "Sentadillas",
+                subtitle: "Cuádriceps, glúteos e isquiotibiales",
+                desc: "Objetivo: 10-15 reps por serie.",
+                mode: 'reps',
+                reps: "10-15",
+                series: 3
+            },
+            {
+                title: "Zancadas",
+                subtitle: "Trabajo unilateral, estabilidad y simetría",
+                desc: "Objetivo: 8-12 reps por pierna.",
+                mode: 'reps',
+                reps: "8-12 por pierna",
+                series: 3
+            },
+            {
+                title: "Plancha Prona",
+                subtitle: "Core, abdominales, glúteos y postura",
+                desc: "Mantén la posición el tiempo que puedas con buena forma.",
+                mode: 'time',
+                duration: 30,
+                series: 3
+            },
+            {
+                title: "Inclinación sobre Mesa",
+                subtitle: "Descompresión de columna y estiramiento final",
+                desc: "Apoya las palmas o antebrazos sobre una mesa alta. Da pasos hacia atrás, flexiona rodillas e inclina el torso hasta 90°. Deja que la cadera tire suavemente hacia atrás.",
+                mode: 'time',
+                duration: 30,
+                series: 3
+            }
+        ]
+    },
+
+    'kickboxing': {
+        title: "🥊 Cardio-Kickboxing Bilateral",
+        subtitle: "Rutina de Bajo Impacto, Fluida (30 Minutos)",
+        type: 'interval',
+        exercises: [
+            {
+                title: "FASE 1: Calentamiento y Activación",
+                subtitle: "5 Minutos | Activación Aeróbica",
+                desc: "1. Paso cruzado + Guardia alta (2 min).<br>2. Rotación de torso con transferencia de peso (1.5 min).<br>3. Caminata activa en el sitio con bombeo de brazos (1.5 min).",
+                totalIntervals: 1,
+                activeTime: 300,
+                restTime: 0,
+                isContinuous: true
+            },
+            {
+                title: "FASE 2: Cardio-Boxeo Continuo",
+                subtitle: "10 Minutos | Sin pesas, trabajo simétrico",
+                desc: "1. Combinación Bilateral: Jab - Cross - Slip - Cross (4 series).<br>2. Cadena Simétrica: Jab - Cross - Uppercut - Hook (2 series).<br><b>Mecánica:</b> Golpe continuo alternando brazos.",
+                totalIntervals: 6,
+                activeTime: 45,
+                restTime: 15,
+                isContinuous: false
+            },
+            {
+                title: "FASE 3: Cardio-Inferior Bilateral",
+                subtitle: "10 Minutos | Piernas y coordinación",
+                desc: "1. Paso-Rodilla diagonal + Guardia (4 series).<br>2. Squat fluido + Jab-Cross al subir (2 series).<br>3. Desplazamiento lateral + Pera de boxeo (1 serie).",
+                totalIntervals: 7,
+                activeTime: 45,
+                restTime: 15,
+                isContinuous: false
+            },
+            {
+                title: "FASE 4: Vuelta a la Calma",
+                subtitle: "5 Minutos | Descompresión y estiramientos",
+                desc: "1. Caminata suave con respiración diafragmática (2 min).<br>2. Estiramiento dinámico de pectoral y hombros (1.5 min).<br>3. Estiramiento en silla para isquiotibiales y cadera (1.5 min).",
+                totalIntervals: 1,
+                activeTime: 300,
+                restTime: 0,
+                isContinuous: true
+            }
+        ]
+    }
+};
+
+/* ============================================================
+   ESTADO GLOBAL
+   ============================================================ */
+let currentRoutineKey = null;
+let state = {
+    currentExerciseIndex: 0,
+    currentSeries: 1,
+    currentInterval: 1,
+    timeLeft: 0,
+    isRunning: false,
+    isResting: false,
+    timerId: null,
+    phase: 'exercise' // 'exercise' | 'rest'
+};
+
+/* ============================================================
+   NAVEGACIÓN ENTRE PANTALLAS
+   ============================================================ */
+function startRoutine(key) {
+    currentRoutineKey = key;
+    resetState();
+    document.getElementById('screen-selector').classList.add('hidden');
+    document.getElementById('screen-routine').classList.remove('hidden');
+    document.getElementById('routine-title').textContent = routines[key].title;
+    document.getElementById('routine-subtitle').textContent = routines[key].subtitle;
+    renderCurrentExercise();
+}
+
+function backToSelector() {
+    if(!confirm('¿Seguro que quieres cambiar de rutina? Se perderá el progreso actual.')) return;
+    stopTimer();
+    document.getElementById('screen-routine').classList.add('hidden');
+    document.getElementById('screen-selector').classList.remove('hidden');
+    currentRoutineKey = null;
+}
+
+function resetState() {
+    stopTimer();
+    state = {
+        currentExerciseIndex: 0,
+        currentSeries: 1,
+        currentInterval: 1,
+        timeLeft: 0,
+        isRunning: false,
+        isResting: false,
+        timerId: null,
+        phase: 'exercise'
+    };
+}
+
+/* ============================================================
+   RENDERIZADO PRINCIPAL
+   ============================================================ */
+function renderCurrentExercise() {
+    const routine = routines[currentRoutineKey];
+    if (routine.type === 'series') {
+        renderSeriesExercise();
+    } else {
+        renderIntervalExercise();
+    }
+}
+
+/* ============================================================
+   RUTINA 40+ (SERIES / REPS)
+   ============================================================ */
+function renderSeriesExercise() {
+    const routine = routines['40plus'];
+    const ex = routine.exercises[state.currentExerciseIndex];
+    const totalEx = routine.exercises.length;
+
+    // Inicializar tiempo si es modo tiempo
+    if (ex.mode === 'time' && state.timeLeft === 0) {
+        state.timeLeft = ex.duration;
+    }
+
+    const area = document.getElementById('exercise-area');
+    const isLastExercise = state.currentExerciseIndex === totalEx - 1;
+    const isLastSeries = state.currentSeries >= ex.series;
+
+    // Generar dots de series
+    let dotsHtml = '';
+    for (let i = 1; i <= ex.series; i++) {
+        let cls = '';
+        if (i < state.currentSeries) cls = 'done';
+        else if (i === state.currentSeries) cls = 'current';
+        dotsHtml += `<div class="series-dot ${cls}">${i}</div>`;
+    }
+
+    let timerHtml = '';
+    if (ex.mode === 'time') {
+        timerHtml = `<div class="timer-display" id="timer">${formatTime(state.timeLeft)}</div>`;
+    } else {
+        timerHtml = `<div class="timer-display" style="font-size:2rem;">🎯 ${ex.reps} reps</div>`;
+    }
+
+    area.innerHTML = `
+        <div class="exercise-card">
+            <div class="exercise-header">
+                <div class="exercise-counter">Ejercicio ${state.currentExerciseIndex + 1} de ${totalEx}</div>
+                <div class="exercise-title">${ex.title}</div>
+                <div class="exercise-subtitle">${ex.subtitle}</div>
+            </div>
+            <div class="exercise-desc">${ex.desc}</div>
+            
+            ${timerHtml}
+
+            <div class="series-info">Series completadas: <b>${state.currentSeries - 1} / ${ex.series}</b></div>
+            <div class="series-tracker">${dotsHtml}</div>
+
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progress"></div>
+            </div>
+
+            <div class="controls">
+                ${ex.mode === 'time' ? `
+                    <button class="btn btn-start" id="btn-start" onclick="startTimer()">▶ Iniciar</button>
+                    <button class="btn btn-pause" id="btn-pause" onclick="pauseTimer()" disabled>⏸ Pausar</button>
+                    <button class="btn btn-reset" onclick="resetCurrentTimer()">↺ Reiniciar</button>
+                ` : `
+                    <button class="btn btn-complete" onclick="completeSeries()">✓ Completar Serie</button>
+                `}
+            </div>
+
+            <div class="controls">
+                ${!isLastSeries ? `
+                    <button class="btn btn-next" onclick="nextSeries()">Iniciar Siguiente Serie →</button>
+                ` : `
+                    <button class="btn btn-next" onclick="nextExercise()">${isLastExercise ? 'Finalizar Rutina ✓' : 'Siguiente Ejercicio →'}</button>
+                `}
+            </div>
+        </div>
+    `;
+
+    updateSeriesProgress();
+}
+
+function completeSeries() {
+    const routine = routines['40plus'];
+    const ex = routine.exercises[state.currentExerciseIndex];
+    
+    if (state.currentSeries >= ex.series) {
+        nextExercise();
+    } else {
+        startRest();
+    }
+}
+
+function nextSeries() {
+    const routine = routines['40plus'];
+    const ex = routine.exercises[state.currentExerciseIndex];
+    
+    if (state.currentSeries >= ex.series) {
+        nextExercise();
+        return;
+    }
+    
+    state.currentSeries++;
+    if (ex.mode === 'time') state.timeLeft = ex.duration;
+    renderSeriesExercise();
+}
+
+function startRest() {
+    state.phase = 'rest';
+    state.timeLeft = 30;
+    state.isRunning = true;
+    
+    const area = document.getElementById('exercise-area');
+    area.innerHTML = `
+        <div class="exercise-card">
+            <div class="exercise-header">
+                <div class="exercise-counter">Descanso entre series</div>
+                <div class="exercise-title">⏱️ Descanso</div>
+                <div class="exercise-subtitle">Recupera el aliento antes de la siguiente serie</div>
+            </div>
+            
+            <div class="timer-display" id="timer">${formatTime(state.timeLeft)}</div>
+            
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progress"></div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-skip" onclick="skipRest()">Saltar Descanso →</button>
+            </div>
+        </div>
+    `;
+    
+    runTimer(() => {
+        // Al terminar descanso, siguiente serie automáticamente
+        state.phase = 'exercise';
+        nextSeries();
+    });
+}
+
+function skipRest() {
+    stopTimer();
+    state.phase = 'exercise';
+    nextSeries();
+}
+
+function nextExercise() {
+    stopTimer();
+    const routine = routines['40plus'];
+    
+    if (state.currentExerciseIndex < routine.exercises.length - 1) {
+        state.currentExerciseIndex++;
+        state.currentSeries = 1;
+        state.timeLeft = 0;
+        renderSeriesExercise();
+    } else {
+        showFinalScreen();
+    }
+}
+
+function resetCurrentTimer() {
+    stopTimer();
+    const ex = routines['40plus'].exercises[state.currentExerciseIndex];
+    if (ex.mode === 'time') state.timeLeft = ex.duration;
+    renderSeriesExercise();
+}
+
+function updateSeriesProgress() {
+    const routine = routines['40plus'];
+    const ex = routine.exercises[state.currentExerciseIndex];
+    const progressEl = document.getElementById('progress');
+    if (!progressEl) return;
+    
+    if (ex.mode === 'time') {
+        const pct = ((ex.duration - state.timeLeft) / ex.duration) * 100;
+        progressEl.style.width = `${pct}%`;
+    } else {
+        const pct = ((state.currentSeries - 1) / ex.series) * 100;
+        progressEl.style.width = `${pct}%`;
+    }
+}
+
+/* ============================================================
+   RUTINA KICKBOXING (INTERVALOS)
+   ============================================================ */
+function renderIntervalExercise() {
+    const routine = routines['kickboxing'];
+    const ex = routine.exercises[state.currentExerciseIndex];
+    
+    state.timeLeft = ex.activeTime;
+    state.isResting = false;
+    state.currentInterval = 1;
+
+    let statusClass = ex.isContinuous ? 'status-continuous' : 'status-active';
+    let statusText = ex.isContinuous ? 'Fase Continua (Sin intervalos)' : `Intervalo Activo ${state.currentInterval} de ${ex.totalIntervals}`;
+
+    const area = document.getElementById('exercise-area');
+    area.innerHTML = `
+        <div class="exercise-card">
+            <div class="exercise-header">
+                <div class="exercise-counter">Fase ${state.currentExerciseIndex + 1} de ${routine.exercises.length}</div>
+                <div class="exercise-title">${ex.title}</div>
+                <div class="exercise-subtitle">${ex.subtitle}</div>
+            </div>
+            <div class="exercise-desc">${ex.desc}</div>
+            
+            <div class="timer-display" id="timer">${formatTime(state.timeLeft)}</div>
+            
+            <div class="interval-status ${statusClass}" id="status">${statusText}</div>
+
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progress"></div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-start" id="btn-start" onclick="startTimer()">▶ Iniciar</button>
+                <button class="btn btn-pause" id="btn-pause" onclick="pauseTimer()" disabled>⏸ Pausar</button>
+                <button class="btn btn-reset" onclick="resetIntervalExercise()">↺ Reiniciar</button>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-next" onclick="nextIntervalExercise()">Siguiente Fase →</button>
+            </div>
+        </div>
+    `;
+    updateIntervalProgress();
+}
+
+function updateIntervalUI() {
+    const ex = routines['kickboxing'].exercises[state.currentExerciseIndex];
+    const timerEl = document.getElementById('timer');
+    const statusEl = document.getElementById('status');
+    
+    if(timerEl) timerEl.textContent = formatTime(state.timeLeft);
+    
+    if(!ex.isContinuous && statusEl) {
+        if(state.isResting) {
+            statusEl.className = 'interval-status status-rest';
+            statusEl.textContent = `⏱️ Descanso | Siguiente: Intervalo ${state.currentInterval + 1} de ${ex.totalIntervals}`;
+        } else {
+            statusEl.className = 'interval-status status-active';
+            statusEl.textContent = `💥 Intervalo Activo ${state.currentInterval} de ${ex.totalIntervals}`;
+        }
+    }
+    updateIntervalProgress();
+}
+
+function updateIntervalProgress() {
+    const ex = routines['kickboxing'].exercises[state.currentExerciseIndex];
+    const totalTime = ex.isContinuous ? ex.activeTime : ex.activeTime + ex.restTime;
+    const progressEl = document.getElementById('progress');
+    if(progressEl) {
+        const pct = ((totalTime - state.timeLeft) / totalTime) * 100;
+        progressEl.style.width = `${pct}%`;
+    }
+}
+
+function handleIntervalEnd() {
+    const ex = routines['kickboxing'].exercises[state.currentExerciseIndex];
+    
+    if(ex.isContinuous) {
+        pauseTimer();
+        nextIntervalExercise();
+        return;
+    }
+
+    if(!state.isResting) {
+        state.isResting = true;
+        state.timeLeft = ex.restTime;
+        updateIntervalUI();
+    } else {
+        state.isResting = false;
+        state.currentInterval++;
+        
+        if(state.currentInterval > ex.totalIntervals) {
+            pauseTimer();
+            nextIntervalExercise();
+        } else {
+            state.timeLeft = ex.activeTime;
+            updateIntervalUI();
+        }
+    }
+}
+
+function resetIntervalExercise() {
+    pauseTimer();
+    renderIntervalExercise();
+}
+
+function nextIntervalExercise() {
+    pauseTimer();
+    const routine = routines['kickboxing'];
+    if(state.currentExerciseIndex < routine.exercises.length - 1) {
+        state.currentExerciseIndex++;
+        renderIntervalExercise();
+    } else {
+        showFinalScreen();
+    }
+}
+
+/* ============================================================
+   TIMER COMÚN
+   ============================================================ */
+function formatTime(seconds) {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+}
+
+function startTimer() {
+    if(state.isRunning) return;
+    state.isRunning = true;
+    const btnStart = document.getElementById('btn-start');
+    const btnPause = document.getElementById('btn-pause');
+    if(btnStart) btnStart.disabled = true;
+    if(btnPause) btnPause.disabled = false;
+
+    const routine = routines[currentRoutineKey];
+    const isIntervalEnd = routine.type === 'interval';
+
+    state.timerId = setInterval(() => {
+        state.timeLeft--;
+        if(state.timeLeft <= 0) {
+            if (isIntervalEnd) {
+                handleIntervalEnd();
+            } else {
+                // Rutina 40+: al terminar tiempo, completar serie
+                stopTimer();
+                completeSeries();
+            }
+        } else {
+            if (isIntervalEnd) updateIntervalUI();
+            else {
+                const t = document.getElementById('timer');
+                if(t) t.textContent = formatTime(state.timeLeft);
+                updateSeriesProgress();
+            }
+        }
+    }, 1000);
+}
+
+function runTimer(onComplete) {
+    state.isRunning = true;
+    state.timerId = setInterval(() => {
+        state.timeLeft--;
+        const t = document.getElementById('timer');
+        if(t) t.textContent = formatTime(state.timeLeft);
+        
+        const progressEl = document.getElementById('progress');
+        if(progressEl) {
+            const pct = ((30 - state.timeLeft) / 30) * 100;
+            progressEl.style.width = `${pct}%`;
+        }
+        
+        if(state.timeLeft <= 0) {
+            stopTimer();
+            if(onComplete) onComplete();
+        }
+    }, 1000);
+}
+
+function pauseTimer() {
+    state.isRunning = false;
+    clearInterval(state.timerId);
+    const btnStart = document.getElementById('btn-start');
+    const btnPause = document.getElementById('btn-pause');
+    if(btnStart) btnStart.disabled = false;
+    if(btnPause) btnPause.disabled = true;
+}
+
+function stopTimer() {
+    state.isRunning = false;
+    clearInterval(state.timerId);
+}
+
+/* ============================================================
+   PANTALLA FINAL
+   ============================================================ */
+function showFinalScreen() {
+    stopTimer();
+    const area = document.getElementById('exercise-area');
+    area.innerHTML = `
+        <div class="final-screen">
+            <h2>✅ ¡Rutina Completada!</h2>
+            <p>Has terminado el entrenamiento con éxito.</p>
+            <p>Recuerda hidratarte y mantener la buena postura durante el día.</p>
+            <div class="controls" style="margin-top:20px;">
+                <button class="btn btn-start" onclick="restartRoutine()" style="flex:1;">🔄 Repetir Rutina</button>
+                <button class="btn btn-next" onclick="backToSelectorDirect()" style="flex:1;">🏠 Menú Principal</button>
+            </div>
+        </div>
+    `;
+}
+
+function restartRoutine() {
+    resetState();
+    renderCurrentExercise();
+}
+
+function backToSelectorDirect() {
+    document.getElementById('screen-routine').classList.add('hidden');
+    document.getElementById('screen-selector').classList.remove('hidden');
+    currentRoutineKey = null;
+}
+</script>
+
+</body>
+</html>
